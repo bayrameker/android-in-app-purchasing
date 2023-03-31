@@ -28,7 +28,7 @@ import java.util.List;
 public class Consumable extends AppCompatActivity {
 
     private final String PRODUCT_PREMIUM = "lifetime";
-    private final String NoAds = "NoAds";
+    private final String NoAds = "noadss";
     private ArrayList<String> purchaseItemIDs = new ArrayList<String>() {{
         add(PRODUCT_PREMIUM);
         add(NoAds);
@@ -135,7 +135,7 @@ public class Consumable extends AppCompatActivity {
         //Set your In App Product ID in setProductId()
         productList.add(
                 QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(PRODUCT_PREMIUM)
+                        .setProductId(NoAds)
                         .setProductType(BillingClient.ProductType.INAPP)
                         .build()
         );
