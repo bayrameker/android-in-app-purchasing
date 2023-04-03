@@ -190,6 +190,7 @@ public class Consumable extends AppCompatActivity {
 
     //This function will be called in handlepurchase() after success of any consumeable purchase
     void ConsumePurchase(Purchase purchase) {
+
         ConsumeParams params = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
                 .build();
@@ -219,21 +220,41 @@ public class Consumable extends AppCompatActivity {
     }
 
     void handlePurchase(Purchase purchases) {
+
+
+
         if (!purchases.isAcknowledged()) {
+
             billingClient.acknowledgePurchase(AcknowledgePurchaseParams
                     .newBuilder()
                     .setPurchaseToken(purchases.getPurchaseToken())
                     .build(), billingResult -> {
 
+                ConsumeResponseListener listener = new ConsumeResponseListener() {
+                    @Override
+                    public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String purchaseToken) {
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                            // Handle the success of the consume operation.
+                        }
+                    }
+                };
+
+                ConsumeParams consumeParams =
+                        ConsumeParams.newBuilder()
+                                .setPurchaseToken(purchases.getPurchaseToken())
+                                .build();
+
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     for (String pur : purchases.getProducts()) {
-                        if (pur.equalsIgnoreCase(PRODUCT_PREMIUM)) {
+                        if (pur.equalsIgnoreCase(NoAds)) {
                             Log.d("TAG", "Purchase is successful");
                             tv_status.setText("Yay! Purchased");
 
                             //Calling Consume to consume the current purchase
                             // so user will be able to buy same product again
-                            ConsumePurchase(purchases);
+                            billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
+
+                           // ConsumePurchase(purchases);
                         }
                     }
                 }
