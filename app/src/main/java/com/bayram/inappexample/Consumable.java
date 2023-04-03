@@ -221,8 +221,6 @@ public class Consumable extends AppCompatActivity {
 
     void handlePurchase(Purchase purchases) {
 
-
-
         if (!purchases.isAcknowledged()) {
 
             billingClient.acknowledgePurchase(AcknowledgePurchaseParams
@@ -252,9 +250,9 @@ public class Consumable extends AppCompatActivity {
 
                             //Calling Consume to consume the current purchase
                             // so user will be able to buy same product again
-                            billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
+                         //   billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
 
-                           // ConsumePurchase(purchases);
+                            ConsumePurchase(purchases);
                         }
                     }
                 }
