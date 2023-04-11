@@ -114,6 +114,10 @@ public class Consumable extends AppCompatActivity {
                 // Try to restart the connection on the next request to
                 // Google Play by calling the startConnection() method.
                 Log.d(TAG, "Connection NOT Established");
+
+
+
+                // TODO: 11.04.2023 alttaki yerine retryBillingServiceConnection() eklenecek ve 3 deneme olacak
                 establishConnection();
             }
         });
@@ -257,6 +261,8 @@ public class Consumable extends AppCompatActivity {
                             // so user will be able to buy same product again
                          //   billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
 
+
+                            // TODO: 11.04.2023 bu kısım backend tarafında yapılacak 
                             ConsumePurchase(purchases);
                         }
                     }
