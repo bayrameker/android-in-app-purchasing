@@ -28,13 +28,13 @@ import java.util.List;
 public class Consumable extends AppCompatActivity {
 
     private final String PRODUCT_PREMIUM = "lifetime";
-    private final String NoAds = "noadss";
-    private ArrayList<String> purchaseItemIDs = new ArrayList<String>() {{
+    private final String NoAds = "consumabletest";
+    private final ArrayList<String> purchaseItemIDs = new ArrayList<String>() {{
         add(PRODUCT_PREMIUM);
         add(NoAds);
     }};
 
-    private String TAG = "iapSample";
+    private final String TAG = "iapSample";
 
     private BillingClient billingClient;
 
@@ -68,6 +68,8 @@ public class Consumable extends AppCompatActivity {
         establishConnection();
         init();
     }
+
+
 
     void init() {
         btn_premium = this.findViewById(R.id.btn_premium);
@@ -145,6 +147,7 @@ public class Consumable extends AppCompatActivity {
                 .build();
 
         billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
+
             @Override
             public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull List<ProductDetails> list) {
 
@@ -228,19 +231,21 @@ public class Consumable extends AppCompatActivity {
                     .setPurchaseToken(purchases.getPurchaseToken())
                     .build(), billingResult -> {
 
-                ConsumeResponseListener listener = new ConsumeResponseListener() {
+         /*       ConsumeResponseListener listener = new ConsumeResponseListener() {
                     @Override
                     public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String purchaseToken) {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             // Handle the success of the consume operation.
                         }
                     }
-                };
+                }; */
 
-                ConsumeParams consumeParams =
+          /*      ConsumeParams consumeParams =
                         ConsumeParams.newBuilder()
                                 .setPurchaseToken(purchases.getPurchaseToken())
                                 .build();
+                                *
+           */
 
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     for (String pur : purchases.getProducts()) {
