@@ -37,7 +37,12 @@ public class Consumable extends AppCompatActivity {
     private final String TAG = "iapSample";
 
     private BillingClient billingClient;
+    private int tries=1;
+    private int maxTries= 3;
 
+    private int connectionAttempts = 0;
+
+    boolean isConnectionEstablished=false;
     Button btn_premium, btn_restore;
     TextView tv_status;
 
@@ -50,7 +55,6 @@ public class Consumable extends AppCompatActivity {
                 .enablePendingPurchases()
                 .setListener(
                         (billingResult, list) -> {
-
                             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
                                 for (Purchase purchase : list) {
 
@@ -92,36 +96,73 @@ public class Consumable extends AppCompatActivity {
     }
 
 
-    void establishConnection() {
+
+    private void establishConnection() {
         billingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    Log.e("err", String.valueOf(billingResult.getResponseCode()));
+                    Log.e("err","baglamtı başarılı");
 
+                    // Bağlantı başarıyla kuruldu
                     // The BillingClient is ready. You can query purchases here.
-
                     //Use any of function below to get details upon successful connection
-
                     // GetSingleInAppDetail();
                     //GetListsInAppDetail();
-
-                    Log.d(TAG, "Connection Established");
+                } else {
+                    // Bağlantı başarısız oldu 3 kere tekrar dene
+                    retryBillingServiceConnection();
                 }
             }
 
             @Override
             public void onBillingServiceDisconnected() {
-                // Try to restart the connection on the next request to
-                // Google Play by calling the startConnection() method.
-                Log.d(TAG, "Connection NOT Established");
-
-
-
+                // Bağlantı kesildiğinde yeniden bağlanmak için yeniden bağlanmayı deneyin
                 // TODO: 11.04.2023 alttaki yerine retryBillingServiceConnection() eklenecek ve 3 deneme olacak
-                establishConnection();
+                retryBillingServiceConnection();
             }
         });
     }
+
+    void retryBillingServiceConnection(){
+        tries=1;
+        maxTries= 3;
+        isConnectionEstablished = false;
+        do{
+            try {
+                billingClient.startConnection(new BillingClientStateListener() {
+                    @Override
+                    public void onBillingServiceDisconnected() {
+                        retryBillingServiceConnection();
+                    }
+
+                    @Override
+                    public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+                        tries++;
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                            isConnectionEstablished = true;
+
+                        }
+                        else if(tries==maxTries){
+                            handleBillingError(billingResult.getResponseCode());
+                        }
+                    }
+                });
+            }
+            catch (Exception e){
+                tries++;
+            }}
+        while (tries <= maxTries && !isConnectionEstablished);
+
+        if(isConnectionEstablished==false){
+            handleBillingError(-1);
+        }
+
+    }
+
+
+
 
     /*
      *
@@ -259,13 +300,16 @@ public class Consumable extends AppCompatActivity {
 
                             //Calling Consume to consume the current purchase
                             // so user will be able to buy same product again
-                         //   billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
+                            //   billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
 
 
-                            // TODO: 11.04.2023 bu kısım backend tarafında yapılacak 
+                            // TODO: 11.04.2023 bu kısım backend tarafında yapılacak
                             ConsumePurchase(purchases);
                         }
                     }
+                }
+                else{
+                    handleBillingError(billingResult.getResponseCode());
                 }
             });
         }
@@ -285,6 +329,7 @@ public class Consumable extends AppCompatActivity {
         billingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingServiceDisconnected() {
+                Log.e("erorr","geldi");
             }
 
             @Override
@@ -312,7 +357,53 @@ public class Consumable extends AppCompatActivity {
                                 }
                             });
                 }
+                else{
+                    handleBillingError(billingResult.getResponseCode());
+                }
+
             }
         });
     }
+
+
+    private void handleBillingError(int responseCode) {
+        String errorMessage = "";
+        switch (responseCode) {
+            case BillingClient.BillingResponseCode.BILLING_UNAVAILABLE:
+                errorMessage = "Billing service is currently unavailable. Please try again later.";
+                break;
+            case BillingClient.BillingResponseCode.DEVELOPER_ERROR:
+                errorMessage = "An error occurred while processing the request. Please try again later.";
+                break;
+            case BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED:
+                errorMessage = "This feature is not supported on your device.";
+                break;
+            case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED:
+                errorMessage = "You already own this item.";
+                break;
+            case BillingClient.BillingResponseCode.ITEM_NOT_OWNED:
+                errorMessage = "You do not own this item.";
+                break;
+            case BillingClient.BillingResponseCode.ITEM_UNAVAILABLE:
+                errorMessage = "This item is not available for purchase.";
+                break;
+            case BillingClient.BillingResponseCode.SERVICE_DISCONNECTED:
+                errorMessage = "Billing service has been disconnected. Please try again later.";
+                break;
+            case BillingClient.BillingResponseCode.SERVICE_TIMEOUT:
+                errorMessage = "Billing service timed out. Please try again later.";
+                break;
+            case BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE:
+                errorMessage = "Billing service is currently unavailable. Please try again later.";
+                break;
+            case BillingClient.BillingResponseCode.USER_CANCELED:
+                errorMessage = "The purchase has been canceled.";
+                break;
+            default:
+                errorMessage = "An unknown error occurred.";
+                break;
+        }
+        Log.e("BillingError", errorMessage);
+    }
+
 }
