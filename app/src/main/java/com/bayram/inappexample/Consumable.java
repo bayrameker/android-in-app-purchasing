@@ -28,10 +28,10 @@ import java.util.List;
 public class Consumable extends AppCompatActivity {
 
     private final String PRODUCT_PREMIUM = "lifetime";
-    private final String NoAds = "consumabletest";
+    private final String ConsumeProductID = "consumabletest";
     private final ArrayList<String> purchaseItemIDs = new ArrayList<String>() {{
         add(PRODUCT_PREMIUM);
-        add(NoAds);
+        add(ConsumeProductID);
     }};
 
     private final String TAG = "iapSample";
@@ -57,7 +57,7 @@ public class Consumable extends AppCompatActivity {
                         (billingResult, list) -> {
                             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
                                 for (Purchase purchase : list) {
-
+                                    String orderId = purchase.getOrderId();
                                     Log.d(TAG, "Response is OK");
                                     handlePurchase(purchase);
                                 }
@@ -182,7 +182,7 @@ public class Consumable extends AppCompatActivity {
         //Set your In App Product ID in setProductId()
         productList.add(
                 QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(NoAds)
+                        .setProductId(ConsumeProductID)
                         .setProductType(BillingClient.ProductType.INAPP)
                         .build()
         );
@@ -294,7 +294,7 @@ public class Consumable extends AppCompatActivity {
 
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     for (String pur : purchases.getProducts()) {
-                        if (pur.equalsIgnoreCase(NoAds)) {
+                        if (pur.equalsIgnoreCase(ConsumeProductID)) {
                             Log.d("TAG", "Purchase is successful");
                             tv_status.setText("Yay! Purchased");
 
