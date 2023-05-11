@@ -237,8 +237,11 @@ public class Consumable extends AppCompatActivity {
     }
 
     //This function will be called in handlepurchase() after success of any consumeable purchase
-    void ConsumePurchase(ConsumeParams params) {
+    void ConsumePurchase(Purchase purchase) {
 
+        ConsumeParams params = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
         billingClient.consumeAsync(params, new ConsumeResponseListener() {
             @Override
             public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
@@ -266,11 +269,50 @@ public class Consumable extends AppCompatActivity {
 
     void handlePurchase(Purchase purchases) {
 
-        ConsumeParams params = ConsumeParams.newBuilder()
-                .setPurchaseToken(purchases.getPurchaseToken())
-                .build();
+        if (!purchases.isAcknowledged()) {
 
-            ConsumePurchase(params);
+            billingClient.acknowledgePurchase(AcknowledgePurchaseParams
+                    .newBuilder()
+                    .setPurchaseToken(purchases.getPurchaseToken())
+                    .build(), billingResult -> {
+
+         /*       ConsumeResponseListener listener = new ConsumeResponseListener() {
+                    @Override
+                    public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String purchaseToken) {
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                            // Handle the success of the consume operation.
+                        }
+                    }
+                }; */
+
+          /*      ConsumeParams consumeParams =
+                        ConsumeParams.newBuilder()
+                                .setPurchaseToken(purchases.getPurchaseToken())
+                                .build();
+                                *
+           */
+
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    for (String pur : purchases.getProducts()) {
+                        if (pur.equalsIgnoreCase(ConsumeProductID)) {
+                            Log.d("TAG", "Purchase is successful");
+                            tv_status.setText("Yay! Purchased");
+
+                            //Calling Consume to consume the current purchase
+                            // so user will be able to buy same product again
+                            //   billingClient.consumeAsync(consumeParams, listener); // you should have listener method !
+
+
+                            // TODO: 11.04.2023 bu kısım backend tarafında yapılacak
+                            ConsumePurchase(purchases);
+                        }
+                    }
+                }
+                else{
+                    handleBillingError(billingResult.getResponseCode());
+                }
+            });
+        }
     }
 
     @Override
