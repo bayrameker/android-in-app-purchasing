@@ -112,9 +112,8 @@ public class Consumable extends AppCompatActivity {
                     //Use any of function below to get details upon successful connection
                     // GetSingleInAppDetail();
                     //GetListsInAppDetail();
-                } else {
-                    // Bağlantı başarısız oldu 3 kere tekrar dene
-                    retryBillingServiceConnection();
+                }  else {
+                    errorControl(billingResult.getResponseCode());
                 }
             }
 
@@ -125,6 +124,22 @@ public class Consumable extends AppCompatActivity {
                 retryBillingServiceConnection();
             }
         });
+    }
+
+    void errorControl(int response){
+
+        if(response == BillingClient.BillingResponseCode.BILLING_UNAVAILABLE ||
+                response == BillingClient.BillingResponseCode.DEVELOPER_ERROR||
+                response ==  BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED ||
+                response ==  BillingClient.BillingResponseCode.USER_CANCELED){
+            // non retriable responses
+            handleBillingError(response);
+        }
+        else{
+            // Bağlantı başarısız oldu 3 kere tekrar dene
+            retryBillingServiceConnection();
+        }
+
     }
 
     void retryBillingServiceConnection(){
