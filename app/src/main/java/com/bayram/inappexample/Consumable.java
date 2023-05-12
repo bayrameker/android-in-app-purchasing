@@ -57,6 +57,8 @@ public class Consumable extends AppCompatActivity {
                         (billingResult, list) -> {
                             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
                                 for (Purchase purchase : list) {
+
+                                    // TODO: we will send order id to the backend before handle purchase
                                     String orderId = purchase.getOrderId();
                                     Log.d(TAG, "Response is OK");
                                     handlePurchase(purchase);
